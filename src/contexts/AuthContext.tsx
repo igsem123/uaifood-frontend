@@ -1,10 +1,11 @@
-import { createContext, useState } from "react";
+import {createContext, useEffect, useState} from "react";
 import {
     loginRequest,
     logoutRequest,
     signupRequest,
+    profileRequest
 } from "@/api/authApi";
-import { setAccessToken, clearAccessToken } from "@/auth/tokenStore";
+import {setAccessToken, clearAccessToken, getAccessToken} from "@/auth/tokenStore";
 import { User } from "@/types/user";
 import * as React from "react";
 
@@ -21,7 +22,32 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    async function restoreSession() {
+        try {
+            const token = getAccessToken();
+
+            if (!token) {
+                setIsLoading(false);
+                return;
+            }
+
+            const response = await profileRequest();
+            setUser(response.user);
+        } catch (err) {
+            console.warn("Falha ao restaurar, removendo sessão");
+            clearAccessToken();
+            setUser(null);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        restoreSession();
+    }, []);
+
 
     async function login(email: string, password: string) {
         setIsLoading(true);

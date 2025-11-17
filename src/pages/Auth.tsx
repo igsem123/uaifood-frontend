@@ -9,6 +9,7 @@ import {z} from "zod";
 import logo from "@/assets/logo.svg";
 import {useAuth} from "@/hooks/use-auth.ts";
 import * as React from "react";
+import {FrontendError} from "@/types/frontendError.ts";
 
 const loginSchema = z.object({
     email: z.string().email("Email inválido"),
@@ -41,17 +42,21 @@ export default function Auth() {
                 title: "Login realizado com sucesso!",
             });
             navigate("/");
-        } catch (error: unknown) {
-            if (error instanceof z.ZodError) {
-                return toast({
-                    title: "Erro no login",
-                    description: error.errors.map((err) => err.message).join(", "),
-                    variant: "destructive",
+        } catch (err: unknown) {
+            const error = err as FrontendError;
+
+            if (error.type === "validation") {
+                error.messages.forEach((m) => {
+                    toast({
+                        title: "Erro no login",
+                        description: m,
+                        variant: "destructive",
+                    });
                 });
-            } else if (error instanceof Error) {
+            } else if (error.type === "api") {
                 toast({
                     title: "Erro no login",
-                    description: error.message || "Verifique suas credenciais",
+                    description: error.message,
                     variant: "destructive",
                 });
             }
@@ -77,16 +82,20 @@ export default function Auth() {
                 description: "Você já pode fazer login",
             });
         } catch (error: unknown) {
-            if (error instanceof z.ZodError) {
-                return toast({
-                    title: "Erro no cadastro",
-                    description: error.errors.map((err) => err.message).join(", "),
-                    variant: "destructive",
+            const err = error as FrontendError;
+
+            if (err.type === "validation") {
+                err.messages.forEach((m) => {
+                    toast({
+                        title: "Erro no cadastro",
+                        description: m,
+                        variant: "destructive",
+                    });
                 });
-            } else if (error instanceof Error) {
+            } else if (err.type === "api") {
                 toast({
                     title: "Erro no cadastro",
-                    description: error.message,
+                    description: err.message,
                     variant: "destructive",
                 });
             }

@@ -42,6 +42,7 @@ api.interceptors.response.use(
             } catch (err) {
                 // Se não conseguir renovar, desloga
                 await logoutRequest();
+                console.log("Sessão expirada, deslogando.");
                 setAccessToken(null);
                 window.location.href = '/auth'; // redireciona para auth
             }
