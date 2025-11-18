@@ -12,13 +12,13 @@ import {Address} from "@/types/address.ts";
 import {createAddress, updateAddress} from "@/api/addressApi.ts";
 import {FrontendError} from "@/types/frontendError.ts";
 
-const addressSchema = z.object({
-    street: z.string().min(3, "Rua é obrigatória"),
+export const addressSchema = z.object({
+    street: z.string().min(3, "Rua deve ter no mínimo 3 caracteres"),
     number: z.string().min(1, "Número é obrigatório"),
-    district: z.string().min(2, "Bairro é obrigatório"),
-    city: z.string().min(2, "Cidade é obrigatória"),
+    district: z.string().min(2, "Bairro deve ter no mínimo 2 caracteres"),
+    city: z.string().min(2, "Cidade deve ter no mínimo 2 caracteres"),
     state: z.string().length(2, "Estado deve ter 2 caracteres"),
-    zipCode: z.string().min(8, "CEP inválido"),
+    zipCode: z.string().regex(/^\d{5}-?\d{3}$/, "CEP inválido"),
 });
 
 type AddressFormData = z.infer<typeof addressSchema>;
