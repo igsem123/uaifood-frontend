@@ -4,7 +4,7 @@ export const Footer = () => {
       <div className="container py-8">
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
           <p className="text-sm text-muted-foreground">
-            © 2024 UaiFood. Todos os direitos reservados.
+            © {new Date().getFullYear()} UaiFood. Todos os direitos reservados.
           </p>
           <div className="flex gap-6">
             <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">

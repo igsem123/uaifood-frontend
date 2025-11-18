@@ -10,6 +10,8 @@ import logo from "@/assets/logo.svg";
 import {useAuth} from "@/hooks/use-auth.ts";
 import * as React from "react";
 import {FrontendError} from "@/types/frontendError.ts";
+import {Header} from "@/components/Header.tsx";
+import {Footer} from "@/components/Footer.tsx";
 
 const loginSchema = z.object({
     email: z.string().email("Email inválido"),
@@ -103,101 +105,105 @@ export default function Auth() {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-muted p-4">
-            <Card className="w-full max-w-md">
-                <CardHeader className="space-y-4 text-center">
-                    <div className="flex justify-center">
-                        <img src={logo} alt="UaiFood" className="size-1/2"/>
-                    </div>
-                    <div>
-                        <CardDescription>Entre ou cadastre-se para continuar</CardDescription>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <Tabs defaultValue="login">
-                        <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="login">Entrar</TabsTrigger>
-                            <TabsTrigger value="signup">Cadastrar</TabsTrigger>
-                        </TabsList>
+        <div className={"flex flex-col min-h-screen bg-muted"}>
+            <Header/>
+            <div className="flex-1 flex items-center justify-center p-4">
+                <Card className="w-full max-w-md">
+                    <CardHeader className="space-y-4 text-center">
+                        <div className="flex justify-center">
+                            <img src={logo} alt="UaiFood" className="size-1/2"/>
+                        </div>
+                        <div>
+                            <CardDescription>Entre ou cadastre-se para continuar</CardDescription>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <Tabs defaultValue="login">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="login">Entrar</TabsTrigger>
+                                <TabsTrigger value="signup">Cadastrar</TabsTrigger>
+                            </TabsList>
 
-                        <TabsContent value="login">
-                            <form onSubmit={handleLogin} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="login-email">Email</Label>
-                                    <Input
-                                        id="login-email"
-                                        name="email"
-                                        type="email"
-                                        placeholder="seu@email.com"
-                                        required
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="login-password">Senha</Label>
-                                    <Input
-                                        id="login-password"
-                                        name="password"
-                                        type="password"
-                                        placeholder="••••••"
-                                        required
-                                    />
-                                </div>
-                                <Button type="submit" className="w-full" disabled={isLoading}>
-                                    {isLoading ? "Entrando..." : "Entrar"}
-                                </Button>
-                            </form>
-                        </TabsContent>
+                            <TabsContent value="login">
+                                <form onSubmit={handleLogin} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="login-email">Email</Label>
+                                        <Input
+                                            id="login-email"
+                                            name="email"
+                                            type="email"
+                                            placeholder="seu@email.com"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="login-password">Senha</Label>
+                                        <Input
+                                            id="login-password"
+                                            name="password"
+                                            type="password"
+                                            placeholder="••••••"
+                                            required
+                                        />
+                                    </div>
+                                    <Button type="submit" className="w-full" disabled={isLoading}>
+                                        {isLoading ? "Entrando..." : "Entrar"}
+                                    </Button>
+                                </form>
+                            </TabsContent>
 
-                        <TabsContent value="signup">
-                            <form onSubmit={handleSignup} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="signup-name">Nome</Label>
-                                    <Input
-                                        id="signup-name"
-                                        name="name"
-                                        type="text"
-                                        placeholder="Seu nome"
-                                        required
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="signup-phone">Telefone</Label>
-                                    <Input
-                                        id="signup-phone"
-                                        name="phone"
-                                        type="tel"
-                                        placeholder="(31) 99999-9999"
-                                        required
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="signup-email">Email</Label>
-                                    <Input
-                                        id="signup-email"
-                                        name="email"
-                                        type="email"
-                                        placeholder="seu@email.com"
-                                        required
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="signup-password">Senha</Label>
-                                    <Input
-                                        id="signup-password"
-                                        name="password"
-                                        type="password"
-                                        placeholder="••••••"
-                                        required
-                                    />
-                                </div>
-                                <Button type="submit" className="w-full" disabled={isLoading}>
-                                    {isLoading ? "Cadastrando..." : "Cadastrar"}
-                                </Button>
-                            </form>
-                        </TabsContent>
-                    </Tabs>
-                </CardContent>
-            </Card>
+                            <TabsContent value="signup">
+                                <form onSubmit={handleSignup} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="signup-name">Nome</Label>
+                                        <Input
+                                            id="signup-name"
+                                            name="name"
+                                            type="text"
+                                            placeholder="Seu nome"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="signup-phone">Telefone</Label>
+                                        <Input
+                                            id="signup-phone"
+                                            name="phone"
+                                            type="tel"
+                                            placeholder="(31) 99999-9999"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="signup-email">Email</Label>
+                                        <Input
+                                            id="signup-email"
+                                            name="email"
+                                            type="email"
+                                            placeholder="seu@email.com"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="signup-password">Senha</Label>
+                                        <Input
+                                            id="signup-password"
+                                            name="password"
+                                            type="password"
+                                            placeholder="••••••"
+                                            required
+                                        />
+                                    </div>
+                                    <Button type="submit" className="w-full" disabled={isLoading}>
+                                        {isLoading ? "Cadastrando..." : "Cadastrar"}
+                                    </Button>
+                                </form>
+                            </TabsContent>
+                        </Tabs>
+                    </CardContent>
+                </Card>
+            </div>
+            <Footer/>
         </div>
     );
 }

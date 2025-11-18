@@ -1,6 +1,7 @@
 import {api} from "@/api/api.ts";
 import {transformApiError} from "@/api/apiErrorValidation.ts";
-import {Order} from "@/types/order.ts";
+import {Order, PaymentMethod} from "@/types/order.ts";
+import {CreateOrderDTO, UpdateOrderDTO} from "@/api/orderDto.ts";
 
 export async function fetchAllOrders(page?: number, pageSize?: number) {
     try {
@@ -10,7 +11,7 @@ export async function fetchAllOrders(page?: number, pageSize?: number) {
                 pageSize
             }
         });
-        return response.data.orders as Order[];
+        return response.data;
     } catch (error) {
         throw transformApiError(error);
     }
@@ -40,7 +41,7 @@ export async function fetchOrderByClientId(clientId: number, page?: number, page
     }
 }
 
-export async function createOrder(orderData: Omit<Order, 'id' | 'createdAt' | 'updatedAt' | 'client' | 'createdBy' | 'items'> & { items: { itemId: number; quantity: number; }[] }) {
+export async function createOrder(orderData: CreateOrderDTO) {
     try {
         const response = await api.post("/orders", orderData);
         return response.data.order as Order;
@@ -49,9 +50,9 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'createdAt' | 'u
     }
 }
 
-export async function updateOrder(id: number, orderData: Partial<Omit<Order, 'id' | 'createdAt' | 'updatedAt' | 'client' | 'createdBy' | 'items'>> & { items?: { itemId: number; quantity: number; }[] }) {
+export async function updateOrder(id: number, data: UpdateOrderDTO) {
     try {
-        const response = await api.patch(`/orders/${id}`, orderData);
+        const response = await api.patch(`/orders/${id}`, data);
         return response.data.order as Order;
     } catch (error) {
         throw transformApiError(error);

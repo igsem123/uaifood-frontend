@@ -373,8 +373,8 @@ export default function Profile() {
                                                 </CardHeader>
                                                 <CardContent>
                                                     <div className="space-y-2">
-                                                        {order.items.map((orderItem, idx) => (
-                                                            <div key={idx} className="flex justify-between text-sm">
+                                                        {(order.items ?? []).map((orderItem) => (
+                                                            <div key={orderItem.id} className="flex justify-between text-sm">
                                                                 <span>
                                                                   {orderItem.quantity}x {orderItem.item.name}
                                                                 </span>
@@ -386,7 +386,7 @@ export default function Profile() {
                                                         <Separator className="my-2"/>
                                                         <div className="flex justify-between font-semibold">
                                                             <span>Total</span>
-                                                            <span>R$ {order.totalAmount.toFixed(2)}</span>
+                                                            <span>R$ {Number(order.totalAmount).toFixed(2)}</span>
                                                         </div>
                                                         <p className="text-sm text-muted-foreground mt-2">
                                                             Pagamento: {paymentMap[order.paymentMethod] || order.paymentMethod}
