@@ -8,37 +8,18 @@ import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
+import {useAuth} from "@/hooks/use-auth.ts";
 
 export default function Cart() {
-  const [session, setSession] = useState<Session | null>(null);
   const { items, updateQuantity, removeItem, total, itemCount } = useCart();
   const navigate = useNavigate();
+  const {user} = useAuth();
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (!session) {
-        navigate("/auth");
-      }
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (!session) {
-        navigate("/auth");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  if (!session) return null;
+  if (!user) return navigate("/auth");
 
   return (
     <div className="min-h-screen bg-background">
-      <Header cartItemsCount={itemCount} isAuthenticated={!!session} />
+      <Header cartItemsCount={itemCount} />
 
       <main className="container py-8">
         <div className="mb-8">

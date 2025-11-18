@@ -7,7 +7,7 @@ interface MenuItemProps {
   id: number;
   name: string;
   description: string;
-  price: number;
+  unitPrice: number;
   imageUrl?: string;
   available: boolean;
   onAddToCart: (id: number) => void;
@@ -17,7 +17,7 @@ export const MenuItem = ({
   id,
   name,
   description,
-  price,
+  unitPrice,
   imageUrl,
   available,
   onAddToCart,
@@ -57,10 +57,10 @@ export const MenuItem = ({
         <div className="flex items-baseline gap-1">
           <span className="text-sm text-muted-foreground">R$</span>
           <span className="text-3xl font-bold text-primary">
-            {price.toFixed(2).split('.')[0]}
+            {unitPrice.toFixed(2).split('.')[0]}
           </span>
           <span className="text-xl font-bold text-primary/70">
-            ,{price.toFixed(2).split('.')[1]}
+            ,{unitPrice.toFixed(2).split('.')[1]}
           </span>
         </div>
       </CardContent>
