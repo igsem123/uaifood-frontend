@@ -6,7 +6,7 @@ export interface Address {
     city: string;
     state: string;
     zipCode: string;
-    userId: number;
+    userId: bigint;
     createdAt: Date;
     updatedAt: Date;
 }
