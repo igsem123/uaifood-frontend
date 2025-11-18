@@ -10,6 +10,7 @@ import {Loader2} from "lucide-react";
 import {useState} from "react";
 import {Address} from "@/types/address.ts";
 import {createAddress, updateAddress} from "@/api/addressApi.ts";
+import {FrontendError} from "@/types/frontendError.ts";
 
 const addressSchema = z.object({
     street: z.string().min(3, "Rua é obrigatória"),
@@ -51,7 +52,7 @@ export function AddressDialog({open, onOpenChange, address, userId, onSuccess}: 
 
         if (address?.id) {
             try {
-                const updatedAddress = await updateAddress({
+                await updateAddress(address.id, {
                     street: data.street,
                     number: data.number,
                     district: data.district,
@@ -75,14 +76,13 @@ export function AddressDialog({open, onOpenChange, address, userId, onSuccess}: 
             }
         } else {
             try {
-                const createdAddress = await createAddress({
+                await createAddress({
                     street: data.street,
                     number: data.number,
                     district: data.district,
                     city: data.city,
                     state: data.state,
-                    zipCode: data.zipCode,
-                    userId: BigInt(userId),
+                    zipCode: data.zipCode
                 });
 
                 toast({
@@ -92,6 +92,9 @@ export function AddressDialog({open, onOpenChange, address, userId, onSuccess}: 
                 onSuccess();
                 onOpenChange(false);
             } catch (error) {
+                const err = error as FrontendError;
+
+
                 toast({
                     title: "Erro ao salvar",
                     description: "Não foi possível criar o endereço.",

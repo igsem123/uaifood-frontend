@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -21,6 +21,7 @@ import {updateUser, fetchUserWithRelationsById} from "@/api/userApi.ts";
 import {deleteAddress} from "@/api/addressApi.ts";
 import {Address} from "@/types/address.ts";
 import {AddressDialog} from "@/components/AddressDialog.tsx";
+import {User} from "@/types/user.ts";
 
 const profileSchema = z.object({
     name: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
@@ -59,35 +60,11 @@ export default function Profile() {
         defaultValues: {name: "", phone: ""},
     });
 
-    useEffect(() => {
-        checkAuth();
+    const loadOrders = useCallback(async (clientId: number) => {
+        const response = await fetchOrderByClientId(clientId);
+        setOrders(response.data ?? []);
     }, []);
 
-    const checkAuth = async () => {
-        if (!user) {
-            navigate("/auth");
-            return;
-        }
-        console.log(user);
-
-        profileForm.setValue("name", user.name || "");
-        profileForm.setValue("phone", user.phone || "");
-
-        if (user.addresses) {
-            setAddresses(user.addresses);
-        }
-
-        await loadOrders(Number(user.id));
-        setLoading(false);
-    };
-
-    const loadOrders = async (id: number) => {
-        const data = await fetchOrderByClientId(id);
-
-        if (data) {
-            setOrders(data as Order[]);
-        }
-    };
 
     const loadProfile = async (id: number) => {
         try {
@@ -103,6 +80,35 @@ export default function Profile() {
             });
         }
     }
+
+    const checkAuth = useCallback((currentUser: User | null) => {
+        if (!currentUser) {
+            navigate("/auth");
+            return;
+        }
+
+        profileForm.setValue("name", currentUser.name ?? "");
+        profileForm.setValue("phone", currentUser.phone ?? "");
+        if (currentUser.addresses) {
+            setAddresses(currentUser.addresses);
+        }
+        setLoading(false);
+    }, [navigate, profileForm, setAddresses, setLoading]);
+
+    useEffect(() => {
+        const current = user ?? null;
+        checkAuth(current);
+
+        if (current?.id) {
+            loadOrders(Number(current.id)).catch(() => {
+                toast({
+                    title: "Erro ao carregar pedidos",
+                    description: "Não foi possível carregar os pedidos.",
+                    variant: "destructive",
+                });
+            });
+        }
+    }, [user, checkAuth, loadOrders, toast]);
 
     const handleLogout = async () => {
         try {
@@ -200,12 +206,12 @@ export default function Profile() {
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
-            <Header />
+            <Header/>
             <main className="container flex-1 py-8">
                 <div className="flex items-center justify-between mb-6">
                     <h1 className="text-3xl font-bold">Meu Perfil</h1>
                     <Button variant="outline" onClick={handleLogout}>
-                        <LogOut className="mr-2 h-4 w-4" />
+                        <LogOut className="mr-2 h-4 w-4"/>
                         Sair
                     </Button>
                 </div>
@@ -228,31 +234,31 @@ export default function Profile() {
                                         <FormField
                                             control={profileForm.control}
                                             name="name"
-                                            render={({ field }) => (
+                                            render={({field}) => (
                                                 <FormItem>
                                                     <FormLabel>Nome</FormLabel>
                                                     <FormControl>
                                                         <Input {...field} />
                                                     </FormControl>
-                                                    <FormMessage />
+                                                    <FormMessage/>
                                                 </FormItem>
                                             )}
                                         />
                                         <FormField
                                             control={profileForm.control}
                                             name="phone"
-                                            render={({ field }) => (
+                                            render={({field}) => (
                                                 <FormItem>
                                                     <FormLabel>Telefone</FormLabel>
                                                     <FormControl>
                                                         <Input {...field} />
                                                     </FormControl>
-                                                    <FormMessage />
+                                                    <FormMessage/>
                                                 </FormItem>
                                             )}
                                         />
                                         <Button type="submit" disabled={saving}>
-                                            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
                                             Salvar Alterações
                                         </Button>
                                     </form>
@@ -268,7 +274,7 @@ export default function Profile() {
                                         <CardDescription>Gerencie seus endereços de entrega</CardDescription>
                                     </div>
                                     <Button onClick={handleAddAddress} size="sm">
-                                        <Plus className="mr-2 h-4 w-4" />
+                                        <Plus className="mr-2 h-4 w-4"/>
                                         Adicionar
                                     </Button>
                                 </div>
@@ -276,12 +282,12 @@ export default function Profile() {
                             <CardContent>
                                 {addresses.length === 0 ? (
                                     <div className="text-center py-8">
-                                        <MapPin className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                                        <MapPin className="mx-auto h-12 w-12 text-muted-foreground mb-3"/>
                                         <p className="text-muted-foreground mb-4">
                                             Você ainda não tem endereços cadastrados.
                                         </p>
                                         <Button onClick={handleAddAddress} variant="outline">
-                                            <Plus className="mr-2 h-4 w-4" />
+                                            <Plus className="mr-2 h-4 w-4"/>
                                             Adicionar Endereço
                                         </Button>
                                     </div>
@@ -312,14 +318,14 @@ export default function Profile() {
                                                                     size="icon"
                                                                     onClick={() => handleEditAddress(address)}
                                                                 >
-                                                                    <Pencil className="h-4 w-4" />
+                                                                    <Pencil className="h-4 w-4"/>
                                                                 </Button>
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="icon"
                                                                     onClick={() => handleDeleteAddress(address.id)}
                                                                 >
-                                                                    <Trash2 className="h-4 w-4" />
+                                                                    <Trash2 className="h-4 w-4"/>
                                                                 </Button>
                                                             </div>
                                                         </div>
@@ -377,7 +383,7 @@ export default function Profile() {
                                                                 </span>
                                                             </div>
                                                         ))}
-                                                        <Separator className="my-2" />
+                                                        <Separator className="my-2"/>
                                                         <div className="flex justify-between font-semibold">
                                                             <span>Total</span>
                                                             <span>R$ {order.totalAmount.toFixed(2)}</span>
@@ -397,7 +403,7 @@ export default function Profile() {
                 </Tabs>
             </main>
 
-            <Footer />
+            <Footer/>
 
             {user.id && (
                 <AddressDialog

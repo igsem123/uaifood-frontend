@@ -33,7 +33,8 @@ export async function fetchOrderByClientId(clientId: number, page?: number, page
                 pageSize
             }
         });
-        return response.data.orders as Order[];
+
+        return response.data;
     } catch (error) {
         throw transformApiError(error);
     }
