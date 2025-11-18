@@ -16,11 +16,20 @@ export async function fetchUsers(page?: number, pageSize?: number): Promise<User
     }
 }
 
-export async function fetchUserById(id: number, relation?: string): Promise<User> {
+export async function fetchUserById(id: number): Promise<User> {
     try {
-        const response = await api.get(`/users/${id}`, {
+        const response = await api.get(`/users/${id}`);
+        return response.data.user;
+    } catch (error) {
+        throw transformApiError(error);
+    }
+}
+
+export async function fetchUserWithRelationsById(id: number, relations: string[]): Promise<User> {
+    try {
+        const response = await api.get(`/users/${id}/relations`, {
             params: {
-                relation
+                include: relations.join(',')
             }
         });
         return response.data.user;

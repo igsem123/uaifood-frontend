@@ -51,7 +51,7 @@ export function AddressDialog({open, onOpenChange, address, userId, onSuccess}: 
 
         if (address?.id) {
             try {
-                const updatedAddress = await updateAddress(address.id, {
+                const updatedAddress = await updateAddress({
                     street: data.street,
                     number: data.number,
                     district: data.district,

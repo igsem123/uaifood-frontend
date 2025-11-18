@@ -17,7 +17,7 @@ import {Loader2, LogOut, MapPin, Pencil, Plus, Trash2} from "lucide-react";
 import {useAuth} from "@/hooks/use-auth.ts";
 import {fetchOrderByClientId} from "@/api/orderApi.ts";
 import {Order} from "@/types/order.ts";
-import {updateUser, fetchUserById} from "@/api/userApi.ts";
+import {updateUser, fetchUserWithRelationsById} from "@/api/userApi.ts";
 import {deleteAddress} from "@/api/addressApi.ts";
 import {Address} from "@/types/address.ts";
 import {AddressDialog} from "@/components/AddressDialog.tsx";
@@ -68,12 +68,13 @@ export default function Profile() {
             navigate("/auth");
             return;
         }
+        console.log(user);
 
         profileForm.setValue("name", user.name || "");
         profileForm.setValue("phone", user.phone || "");
 
-        if (user.adressess) {
-            setAddresses(user.adressess);
+        if (user.addresses) {
+            setAddresses(user.addresses);
         }
 
         await loadOrders(Number(user.id));
@@ -90,9 +91,9 @@ export default function Profile() {
 
     const loadProfile = async (id: number) => {
         try {
-            const data = await fetchUserById(id, 'adressess');
-            if (data.adressess) {
-                setAddresses(data.adressess);
+            const data = await fetchUserWithRelationsById(id, ["addresses"]);
+            if (data.addresses) {
+                setAddresses(data.addresses);
             }
         } catch (error) {
             toast({

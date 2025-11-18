@@ -4,7 +4,7 @@ export interface User {
     id: string;
     name: string;
     email: string;
-    adressess?: Address[];
+    addresses?: Address[];
     phone: string;
     type: UserType;
     createdAt: Date;

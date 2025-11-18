@@ -11,9 +11,9 @@ export async function createAddress(address: Omit<Address, 'id' | 'createdAt' | 
     }
 }
 
-export async function updateAddress(id: number, address: Partial<Omit<Address, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Address> {
+export async function updateAddress(address: Partial<Omit<Address, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Address> {
     try {
-        const response = await api.patch(`/addresses/${id}`, address);
+        const response = await api.patch(`/addresses`, address);
         return response.data.address;
     } catch (error) {
         throw transformApiError(error);
