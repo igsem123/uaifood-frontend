@@ -1,4 +1,4 @@
-import { PaymentMethod } from "@/types/order";
+import { PaymentMethod } from "@/types/order.ts";
 
 export type CreateOrderDTO = {
     clientId: number;
@@ -14,10 +14,7 @@ export type CreateOrderDTO = {
 };
 
 export type UpdateOrderDTO = {
-    paymentMethod?: PaymentMethod;
-    totalAmount?: number;
-    items?: {
-        itemId: number;
-        quantity: number;
-    }[];
+    clientId?: number;
+    confirmedByUserId?: number;
+    status?: string;
 };

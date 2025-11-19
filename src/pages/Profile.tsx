@@ -21,7 +21,6 @@ import {updateUser, fetchUserWithRelationsById} from "@/api/userApi.ts";
 import {deleteAddress} from "@/api/addressApi.ts";
 import {Address} from "@/types/address.ts";
 import {AddressDialog} from "@/components/AddressDialog.tsx";
-import {User} from "@/types/user.ts";
 
 const profileSchema = z.object({
     name: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
@@ -81,26 +80,20 @@ export default function Profile() {
         }
     }
 
-    const checkAuth = useCallback((currentUser: User | null) => {
-        if (!currentUser) {
+    useEffect(() => {
+        if (!user) {
             navigate("/auth");
             return;
         }
 
-        profileForm.setValue("name", currentUser.name ?? "");
-        profileForm.setValue("phone", currentUser.phone ?? "");
-        if (currentUser.addresses) {
-            setAddresses(currentUser.addresses);
+        profileForm.setValue("name", user.name ?? "");
+        profileForm.setValue("phone", user.phone ?? "");
+        if (user.addresses) {
+            setAddresses(user.addresses);
         }
-        setLoading(false);
-    }, [navigate, profileForm, setAddresses, setLoading]);
 
-    useEffect(() => {
-        const current = user ?? null;
-        checkAuth(current);
-
-        if (current?.id) {
-            loadOrders(Number(current.id)).catch(() => {
+        if (user.id) {
+            loadOrders(Number(user.id)).catch(() => {
                 toast({
                     title: "Erro ao carregar pedidos",
                     description: "Não foi possível carregar os pedidos.",
@@ -108,7 +101,10 @@ export default function Profile() {
                 });
             });
         }
-    }, [user, checkAuth, loadOrders, toast]);
+
+        setLoading(false);
+
+    }, [user, loadOrders, toast, profileForm, navigate]);
 
     const handleLogout = async () => {
         try {
@@ -192,6 +188,12 @@ export default function Profile() {
             loadProfile(Number(user.id));
         }
     };
+
+    // Protege a tela caso user seja null
+    if (!user && !loading) {
+        navigate("/auth");
+        return null;
+    }
 
     if (loading) {
         return (
