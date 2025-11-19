@@ -60,7 +60,7 @@ export const Header = ({ cartItemsCount = 0 }: HeaderProps) => {
                                     </Button>
                                 </Link>
                             )}
-                            <NotificationsPopover userId={user.id.toString()} />
+                            <NotificationsPopover userId={user.id} />
                             <Link to="/cart" className="relative">
                                 <Button variant="ghost" size="icon">
                                     <ShoppingCart className="h-5 w-5" />

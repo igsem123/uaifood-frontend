@@ -14,6 +14,7 @@ export type CreateOrderDTO = {
 };
 
 export type UpdateOrderDTO = {
+    clientId?: number;
     confirmedByUserId?: number;
     status?: string;
 };

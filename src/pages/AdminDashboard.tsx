@@ -245,9 +245,9 @@ export default function AdminDashboard() {
         }
     };
 
-    const handleUpdateOrderStatus = async (orderId: number, newStatus: OrderStatus) => {
+    const handleUpdateOrderStatus = async (orderId: number, clientId: number, newStatus: OrderStatus) => {
         try {
-            await updateOrder(orderId, { confirmedByUserId: Number(user.id), status: newStatus });
+            await updateOrder(orderId, { clientId: Number(clientId), confirmedByUserId: Number(user.id), status: newStatus });
             toast({title: "Status do pedido atualizado!"});
             loadData();
         } catch (error: unknown) {
@@ -602,7 +602,7 @@ export default function AdminDashboard() {
                                                 <TableCell>
                                                     <Select
                                                         value={order.status}
-                                                        onValueChange={(value) => handleUpdateOrderStatus(order.id, value as OrderStatus)}
+                                                        onValueChange={(value) => handleUpdateOrderStatus(order.id, order.clientId, value as OrderStatus)}
                                                     >
                                                         <SelectTrigger className="w-[150px]">
                                                             <SelectValue/>
