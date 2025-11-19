@@ -33,9 +33,23 @@ export enum PaymentMethod {
     PIX = "PIX",
 }
 
+export const paymentMap: Record<string, string> = {
+    CASH: "Dinheiro",
+    DEBIT: "Débito",
+    CREDIT: "Crédito",
+    PIX: "PIX",
+};
+
 export enum OrderStatus {
     PENDING = "PENDING",
     CONFIRMED = "CONFIRMED",
     DELIVERED = "DELIVERED",
     CANCELED = "CANCELED",
 }
+
+export const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+    PENDING: {label: "Pendente", variant: "outline"},
+    CONFIRMED: {label: "Confirmado", variant: "secondary"},
+    DELIVERED: {label: "Entregue", variant: "default"},
+    CANCELED: {label: "Cancelado", variant: "destructive"},
+};

@@ -15,6 +15,7 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     signup: (email: string, password: string, name: string, phone: string) => Promise<void>;
+    me: () => Promise<void>;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -78,6 +79,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }
 
+    async function me() {
+        setIsLoading(true);
+        try {
+            const response = await profileRequest();
+            setUser(response.user);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
     return (
         <AuthContext.Provider
             value={{
@@ -86,6 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 login,
                 logout,
                 signup,
+                me,
             }}
         >
             {children}

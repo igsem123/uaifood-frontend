@@ -47,18 +47,18 @@ export async function createUser(user: Omit<User, 'id' | 'createdAt' | 'updatedA
     }
 }
 
-export async function updateUser(id: number, user: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>>): Promise<User> {
+export async function updateUser(user: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>>): Promise<User> {
     try {
-        const response = await api.patch(`/api/users/${id}`, user);
+        const response = await api.patch(`/api/users`, user);
         return response.data.user;
     } catch (error) {
         throw transformApiError(error);
     }
 }
 
-export async function deleteUser(id: number): Promise<void> {
+export async function deleteUser(): Promise<void> {
     try {
-        await api.delete(`/api/users/${id}`);
+        await api.delete(`/api/users`);
     } catch (error) {
         throw transformApiError(error);
     }

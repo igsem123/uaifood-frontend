@@ -16,7 +16,7 @@ import {useToast} from "@/hooks/use-toast";
 import {Loader2, LogOut, MapPin, Pencil, Plus, Trash2} from "lucide-react";
 import {useAuth} from "@/hooks/use-auth.ts";
 import {fetchOrderByClientId} from "@/api/orderApi.ts";
-import {Order} from "@/types/order.ts";
+import {Order, paymentMap, statusMap} from "@/types/order.ts";
 import {updateUser, fetchUserWithRelationsById} from "@/api/userApi.ts";
 import {deleteAddress} from "@/api/addressApi.ts";
 import {Address} from "@/types/address.ts";
@@ -28,20 +28,6 @@ const profileSchema = z.object({
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
-
-const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-    PENDING: {label: "Pendente", variant: "outline"},
-    CONFIRMED: {label: "Confirmado", variant: "secondary"},
-    DELIVERED: {label: "Entregue", variant: "default"},
-    CANCELED: {label: "Cancelado", variant: "destructive"},
-};
-
-const paymentMap: Record<string, string> = {
-    CASH: "Dinheiro",
-    DEBIT: "Débito",
-    CREDIT: "Crédito",
-    PIX: "PIX",
-};
 
 export default function Profile() {
     const navigate = useNavigate();
@@ -129,7 +115,7 @@ export default function Profile() {
         setSaving(true);
 
         try {
-            await updateUser(Number(user.id), {
+            await updateUser({
                 name: data.name,
                 phone: data.phone,
             });

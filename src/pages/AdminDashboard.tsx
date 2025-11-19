@@ -23,7 +23,7 @@ import {Badge} from "@/components/ui/badge";
 import {Pencil, Trash2, Plus, Upload, Loader2, EyeIcon} from "lucide-react";
 import {Category} from "@/types/category.ts";
 import {Item} from "@/types/item.ts";
-import {Order, OrderStatus} from "@/types/order.ts";
+import {Order, OrderStatus, paymentMap, statusMap} from "@/types/order.ts";
 import {User} from "@/types/user.ts";
 import {useAuth} from "@/hooks/use-auth.ts";
 import {fetchOrders, updateOrder} from "@/api/orderApi.ts";
@@ -44,7 +44,7 @@ export default function AdminDashboard() {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const navigate = useNavigate();
     const {toast} = useToast();
-    const { user } = useAuth();
+    const {user} = useAuth();
     const [ordersPage, setOrdersPage] = useState(1);
     const [ordersPageSize] = useState(10);
     const [confirmDeleteItemId, setConfirmDeleteItemId] = useState<number | null>(null);
@@ -97,10 +97,10 @@ export default function AdminDashboard() {
 
         try {
             if (editingCategory?.id) {
-                await updateCategory(editingCategory!.id, { name, description });
+                await updateCategory(editingCategory!.id, {name, description});
                 toast({title: "Categoria atualizada com sucesso!"});
             } else {
-                await createCategory({ name, description });
+                await createCategory({name, description});
                 toast({title: "Categoria criada com sucesso!"});
             }
             setEditingCategory(null);
@@ -172,10 +172,10 @@ export default function AdminDashboard() {
         try {
             if (editingItem?.id) {
                 await updateItem(editingItem.id, itemData);
-                toast({ title: "Item atualizado com sucesso!" });
+                toast({title: "Item atualizado com sucesso!"});
             } else {
                 await createItem(itemData);
-                toast({ title: "Item criado com sucesso!" });
+                toast({title: "Item criado com sucesso!"});
             }
 
             setEditingItem(null);
@@ -247,7 +247,11 @@ export default function AdminDashboard() {
 
     const handleUpdateOrderStatus = async (orderId: number, clientId: number, newStatus: OrderStatus) => {
         try {
-            await updateOrder(orderId, { clientId: Number(clientId), confirmedByUserId: Number(user.id), status: newStatus });
+            await updateOrder(orderId, {
+                clientId: Number(clientId),
+                confirmedByUserId: Number(user.id),
+                status: newStatus
+            });
             toast({title: "Status do pedido atualizado!"});
             loadData();
         } catch (error: unknown) {
@@ -279,14 +283,10 @@ export default function AdminDashboard() {
 
     if (!isAdmin) return null;
 
-    const getStatusBadge = (status: string) => {
-        const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-            PENDING: "outline",
-            CONFIRMED: "default",
-            DELIVERED: "secondary",
-            CANCELED: "destructive",
-        };
-        return <Badge variant={variants[status] || "default"}>{status}</Badge>;
+    const getStatusBadge = (order: Order) => {
+        return <Badge variant={statusMap[order.status]?.variant || "default"}>
+            {statusMap[order.status]?.label || order.status}
+        </Badge>;
     };
 
     return (
@@ -383,16 +383,20 @@ export default function AdminDashboard() {
                             </CardContent>
                         </Card>
 
-                        <Dialog open={confirmDeleteCategoryId !== null} onOpenChange={(open) => !open && setConfirmDeleteCategoryId(null)}>
+                        <Dialog open={confirmDeleteCategoryId !== null}
+                                onOpenChange={(open) => !open && setConfirmDeleteCategoryId(null)}>
                             <DialogContent>
                                 <DialogHeader>
                                     <DialogTitle>Confirmar exclusão</DialogTitle>
-                                    <DialogDescription>Tem certeza que deseja excluir esta categoria?</DialogDescription>
+                                    <DialogDescription>Tem certeza que deseja excluir esta
+                                        categoria?</DialogDescription>
                                 </DialogHeader>
 
                                 <div className="flex justify-end gap-2 mt-4">
-                                    <Button variant="ghost" onClick={() => setConfirmDeleteCategoryId(null)}>Cancelar</Button>
-                                    <Button onClick={handleConfirmDeleteCategory} className="bg-destructive">Excluir</Button>
+                                    <Button variant="ghost"
+                                            onClick={() => setConfirmDeleteCategoryId(null)}>Cancelar</Button>
+                                    <Button onClick={handleConfirmDeleteCategory}
+                                            className="bg-destructive">Excluir</Button>
                                 </div>
                             </DialogContent>
                         </Dialog>
@@ -425,7 +429,7 @@ export default function AdminDashboard() {
                                         <form onSubmit={handleSaveItem} className="space-y-4">
                                             <div>
                                                 <Label htmlFor="name">Nome</Label>
-                                                <Input id="name" name="name" defaultValue={editingItem?.name} required />
+                                                <Input id="name" name="name" defaultValue={editingItem?.name} required/>
                                             </div>
 
                                             <div>
@@ -458,12 +462,12 @@ export default function AdminDashboard() {
                                                         defaultValue={editingItem?.categoryId?.toString()}
                                                     >
                                                         <SelectTrigger>
-                                                            <SelectValue placeholder="Selecione" />
+                                                            <SelectValue placeholder="Selecione"/>
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             {categories.map((cat) => (
                                                                 <SelectItem key={cat.id} value={cat.id.toString()}>
-                                                                    {cat.description}
+                                                                    {cat.name}
                                                                 </SelectItem>
                                                             ))}
                                                         </SelectContent>
@@ -483,7 +487,8 @@ export default function AdminDashboard() {
 
                                                 {/* Preview automático se for URL válida */}
                                                 {(editingItem?.imageUrl) && (
-                                                    <div className="relative mt-3 aspect-video w-full overflow-hidden rounded-lg border bg-muted">
+                                                    <div
+                                                        className="relative mt-3 aspect-video w-full overflow-hidden rounded-lg border bg-muted">
                                                         <img
                                                             src={editingItem.imageUrl}
                                                             alt="Preview"
@@ -500,7 +505,7 @@ export default function AdminDashboard() {
                                                     defaultValue={editingItem?.available?.toString() || "true"}
                                                 >
                                                     <SelectTrigger>
-                                                        <SelectValue />
+                                                        <SelectValue/>
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         <SelectItem value="true">Sim</SelectItem>
@@ -597,8 +602,8 @@ export default function AdminDashboard() {
                                                     })}
                                                 </TableCell>
                                                 <TableCell>R$ {Number(order.totalAmount).toFixed(2)}</TableCell>
-                                                <TableCell>{order.paymentMethod}</TableCell>
-                                                <TableCell>{getStatusBadge(order.status)}</TableCell>
+                                                <TableCell>{paymentMap[order.paymentMethod] || order.paymentMethod}</TableCell>
+                                                <TableCell>{getStatusBadge(order)}</TableCell>
                                                 <TableCell>
                                                     <Select
                                                         value={order.status}
@@ -608,10 +613,14 @@ export default function AdminDashboard() {
                                                             <SelectValue/>
                                                         </SelectTrigger>
                                                         <SelectContent>
-                                                            <SelectItem value={OrderStatus.PENDING}>PENDING</SelectItem>
-                                                            <SelectItem value={OrderStatus.CONFIRMED}>CONFIRMED</SelectItem>
-                                                            <SelectItem value={OrderStatus.DELIVERED}>DELIVERED</SelectItem>
-                                                            <SelectItem value={OrderStatus.CANCELED}>CANCELED</SelectItem>
+                                                            <SelectItem
+                                                                value={OrderStatus.PENDING}>PENDENTE</SelectItem>
+                                                            <SelectItem
+                                                                value={OrderStatus.CONFIRMED}>CONFIRMADO</SelectItem>
+                                                            <SelectItem
+                                                                value={OrderStatus.DELIVERED}>ENTREGUE</SelectItem>
+                                                            <SelectItem
+                                                                value={OrderStatus.CANCELED}>CANCELADO</SelectItem>
                                                         </SelectContent>
                                                     </Select>
                                                 </TableCell>
@@ -624,18 +633,19 @@ export default function AdminDashboard() {
                     </TabsContent>
                 </Tabs>
 
-                <Dialog open={confirmDeleteItemId !== null} onOpenChange={(open) => !open && setConfirmDeleteItemId(null)}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Confirmar exclusão</DialogTitle>
-                        <DialogDescription>Tem certeza que deseja excluir este item?</DialogDescription>
-                    </DialogHeader>
+                <Dialog open={confirmDeleteItemId !== null}
+                        onOpenChange={(open) => !open && setConfirmDeleteItemId(null)}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Confirmar exclusão</DialogTitle>
+                            <DialogDescription>Tem certeza que deseja excluir este item?</DialogDescription>
+                        </DialogHeader>
 
-                    <div className="flex justify-end gap-2 mt-4">
-                        <Button variant="ghost" onClick={() => setConfirmDeleteItemId(null)}>Cancelar</Button>
-                        <Button onClick={handleConfirmDeleteItem} className="bg-destructive">Excluir</Button>
-                    </div>
-                </DialogContent>
+                        <div className="flex justify-end gap-2 mt-4">
+                            <Button variant="ghost" onClick={() => setConfirmDeleteItemId(null)}>Cancelar</Button>
+                            <Button onClick={handleConfirmDeleteItem} className="bg-destructive">Excluir</Button>
+                        </div>
+                    </DialogContent>
                 </Dialog>
             </div>
         </div>
