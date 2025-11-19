@@ -20,7 +20,7 @@ export async function refreshRequest() {
 }
 
 export async function logoutRequest() {
-    return api.post("/auth/logout", {}, { skipAuthRefresh: true });
+    return api.post("/api/auth/logout", {}, { skipAuthRefresh: true });
 }
 
 export async function signupRequest(email: string, password: string, name: string, phone: string) {

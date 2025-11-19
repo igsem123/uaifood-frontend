@@ -12,21 +12,38 @@ import * as React from "react";
 import {FrontendError} from "@/types/frontendError.ts";
 import {Header} from "@/components/Header.tsx";
 import {Footer} from "@/components/Footer.tsx";
+import {useState} from "react";
+import {CheckCircle2, Lock} from "lucide-react";
 
 const loginSchema = z.object({
     email: z.string().email("Email inválido"),
     password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
 });
 
-const signupSchema = loginSchema.extend({
+const signupSchema = z.object({
     name: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
     phone: z.string().min(10, "Telefone inválido"),
+    email: z.string().email("Email inválido"),
+    password: z
+        .string()
+        .min(8, { message: "A senha deve ter pelo menos 8 caracteres" })
+        .max(100, { message: "A senha deve ter menos de 100 caracteres" })
+        .regex(/[A-Z]/, { message: "A senha deve conter pelo menos uma letra maiúscula" })
+        .regex(/[a-z]/, { message: "A senha deve conter pelo menos uma letra minúscula" })
+        .regex(/[0-9]/, { message: "A senha deve conter pelo menos um número" })
+        .regex(/[^A-Za-z0-9]/, { message: "A senha deve conter pelo menos um caractere especial" }),
+    confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
 });
 
 export default function Auth() {
     const navigate = useNavigate();
     const {toast} = useToast();
     const {login, signup, isLoading} = useAuth();
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -71,11 +88,12 @@ export default function Auth() {
         const formData = new FormData(e.currentTarget);
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
+        const confirmPassword = formData.get("confirmPassword") as string;
         const name = formData.get("name") as string;
         const phone = formData.get("phone") as string;
 
         try {
-            signupSchema.parse({email, password, name, phone});
+            signupSchema.parse({email, password, confirmPassword, name, phone});
 
             await signup(email, password, name, phone);
 
@@ -83,8 +101,12 @@ export default function Auth() {
                 title: "Cadastro realizado!",
                 description: "Você já pode fazer login",
             });
+
+            setPassword("");
+            setConfirmPassword("");
         } catch (error: unknown) {
             const err = error as FrontendError;
+            console.error("Signup error:", err);
 
             if (err.type === "validation") {
                 err.messages.forEach((m) => {
@@ -186,13 +208,62 @@ export default function Auth() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="signup-password">Senha</Label>
-                                        <Input
-                                            id="signup-password"
-                                            name="password"
-                                            type="password"
-                                            placeholder="••••••"
-                                            required
-                                        />
+                                        <div className="relative">
+                                            <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                                            <Input
+                                                id="signup-password"
+                                                name="password"
+                                                type="password"
+                                                placeholder="••••••••"
+                                                className="pl-10"
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                required
+                                                autoComplete="new-password"
+                                            />
+                                        </div>
+                                        <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                                            <li className="flex items-center gap-1">
+                                                <CheckCircle2 className={`h-3 w-3 ${password.length >= 8 ? 'text-green-500' : ''}`} />
+                                                Mínimo de 8 caracteres
+                                            </li>
+                                            <li className="flex items-center gap-1">
+                                                <CheckCircle2 className={`h-3 w-3 ${/[A-Z]/.test(password) ? 'text-green-500' : ''}`} />
+                                                Uma letra maiúscula
+                                            </li>
+                                            <li className="flex items-center gap-1">
+                                                <CheckCircle2 className={`h-3 w-3 ${/[a-z]/.test(password) ? 'text-green-500' : ''}`} />
+                                                Uma letra minúscula
+                                            </li>
+                                            <li className="flex items-center gap-1">
+                                                <CheckCircle2 className={`h-3 w-3 ${/[0-9]/.test(password) ? 'text-green-500' : ''}`} />
+                                                Um número
+                                            </li>
+                                            <li className="flex items-center gap-1">
+                                                <CheckCircle2 className={`h-3 w-3 ${/[^A-Za-z0-9]/.test(password) ? 'text-green-500' : ''}`} />
+                                                Um caractere especial
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="signup-confirm-password">Confirmar Senha</Label>
+                                        <div className="relative">
+                                            <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                                            <Input
+                                                id="signup-confirm-password"
+                                                name="confirmPassword"
+                                                type="password"
+                                                placeholder="••••••••"
+                                                className="pl-10"
+                                                value={confirmPassword}
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                                required
+                                                autoComplete="new-password"
+                                            />
+                                        </div>
+                                        {confirmPassword && password !== confirmPassword && (
+                                            <p className="text-sm text-destructive">As senhas não coincidem</p>
+                                        )}
                                     </div>
                                     <Button type="submit" className="w-full" disabled={isLoading}>
                                         {isLoading ? "Cadastrando..." : "Cadastrar"}

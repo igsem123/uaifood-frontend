@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useEffect, useState, useCallback} from "react";
 import {useNavigate} from "react-router-dom";
 import {CreditCard, Wallet, Banknote, Smartphone, Plus, MapPin} from "lucide-react";
 import {Header} from "@/components/Header";
@@ -29,21 +29,44 @@ export default function Checkout() {
     const {items, total, itemCount, clearCart} = useCart();
     const navigate = useNavigate();
     const {toast} = useToast();
-    const {user} = useAuth();
+    const {user, me} = useAuth();
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+
+    const loadProfile = useCallback(async () => {
+        try {
+            await me();
+        } catch (error) {
+            console.error("Erro ao carregar perfil do usuário:", error);
+        }
+    }, [me]);
+
+    useEffect(() => {
+        if (!user) {
+            navigate("/auth");
+            return;
+        }
+
+        // Carrega o perfil apenas uma vez
+        loadProfile();
+    }, []);
 
     useEffect(() => {
         if (items.length === 0) {
             navigate("/");
         }
+    }, [items, navigate]);
 
-        if (!user) {
-            navigate("/auth");
-        } else {
+    useEffect(() => {
+        if (user?.addresses && user.addresses.length > 0) {
             setAddresses(user.addresses);
+            setSelectedAddress(prev => prev ?? user.addresses[0]);
+        } else {
+            setAddresses([]);
+            setSelectedAddress(null);
         }
-    }, [items, navigate, user]);
+    }, [user]);
+
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
