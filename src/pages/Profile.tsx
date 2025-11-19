@@ -193,6 +193,12 @@ export default function Profile() {
         }
     };
 
+    // Protege a tela caso user seja null
+    if (!user && !loading) {
+        navigate("/auth");
+        return null;
+    }
+
     if (loading) {
         return (
             <div className="min-h-screen bg-background">

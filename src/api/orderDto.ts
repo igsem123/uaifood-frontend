@@ -14,10 +14,6 @@ export type CreateOrderDTO = {
 };
 
 export type UpdateOrderDTO = {
-    paymentMethod?: PaymentMethod;
-    totalAmount?: number;
-    items?: {
-        itemId: number;
-        quantity: number;
-    }[];
+    confirmedByUserId?: number;
+    status?: string;
 };

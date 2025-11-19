@@ -3,7 +3,7 @@ import {transformApiError} from "@/api/apiErrorValidation.ts";
 import {Order, PaymentMethod} from "@/types/order.ts";
 import {CreateOrderDTO, UpdateOrderDTO} from "@/api/orderDto.ts";
 
-export async function fetchAllOrders(page?: number, pageSize?: number) {
+export async function fetchOrders(page?: number, pageSize?: number) {
     try {
         const response = await api.get("/orders", {
             params: {
