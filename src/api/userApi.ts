@@ -4,7 +4,7 @@ import {User} from "@/types/user.ts";
 
 export async function fetchUsers(page?: number, pageSize?: number): Promise<User[]> {
     try {
-        const response = await api.get("/users", {
+        const response = await api.get("/api/users", {
             params: {
                 page,
                 pageSize
@@ -18,7 +18,7 @@ export async function fetchUsers(page?: number, pageSize?: number): Promise<User
 
 export async function fetchUserById(id: number): Promise<User> {
     try {
-        const response = await api.get(`/users/${id}`);
+        const response = await api.get(`/api/users/${id}`);
         return response.data.user;
     } catch (error) {
         throw transformApiError(error);
@@ -27,7 +27,7 @@ export async function fetchUserById(id: number): Promise<User> {
 
 export async function fetchUserWithRelationsById(id: number, relations: string[]): Promise<User> {
     try {
-        const response = await api.get(`/users/${id}/relations`, {
+        const response = await api.get(`/api/users/${id}/relations`, {
             params: {
                 include: relations.join(',')
             }
@@ -40,7 +40,7 @@ export async function fetchUserWithRelationsById(id: number, relations: string[]
 
 export async function createUser(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
     try {
-        const response = await api.post("/users", user);
+        const response = await api.post("/api/users", user);
         return response.data.user;
     } catch (error) {
         throw transformApiError(error);
@@ -49,7 +49,7 @@ export async function createUser(user: Omit<User, 'id' | 'createdAt' | 'updatedA
 
 export async function updateUser(id: number, user: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>>): Promise<User> {
     try {
-        const response = await api.patch(`/users/${id}`, user);
+        const response = await api.patch(`/api/users/${id}`, user);
         return response.data.user;
     } catch (error) {
         throw transformApiError(error);
@@ -58,7 +58,7 @@ export async function updateUser(id: number, user: Partial<Omit<User, 'id' | 'cr
 
 export async function deleteUser(id: number): Promise<void> {
     try {
-        await api.delete(`/users/${id}`);
+        await api.delete(`/api/users/${id}`);
     } catch (error) {
         throw transformApiError(error);
     }

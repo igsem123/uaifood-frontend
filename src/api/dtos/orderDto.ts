@@ -1,4 +1,4 @@
-import { PaymentMethod } from "@/types/order";
+import { PaymentMethod } from "@/types/order.ts";
 
 export type CreateOrderDTO = {
     clientId: number;
