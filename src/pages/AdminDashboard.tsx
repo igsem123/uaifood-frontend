@@ -2,7 +2,6 @@ import {useState, useEffect, useCallback} from "react";
 import {useNavigate} from "react-router-dom";
 import {useToast} from "@/hooks/use-toast";
 import {Header} from "@/components/Header";
-import {Footer} from "@/components/Footer";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
@@ -31,6 +30,13 @@ import {fetchCategories, updateCategory, createCategory, deleteCategory} from "@
 import {fetchItems, updateItem, createItem, deleteItem} from "@/api/itemApi.ts";
 import {FrontendError} from "@/types/frontendError.ts";
 import * as React from "react";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink, PaginationNext,
+    PaginationPrevious
+} from "@/components/ui/pagination.tsx";
 
 export default function AdminDashboard() {
     const [isAdmin, setIsAdmin] = useState(false);
@@ -40,15 +46,36 @@ export default function AdminDashboard() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [editingItem, setEditingItem] = useState<Item | null>(null);
-    const [selectedImage, setSelectedImage] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const navigate = useNavigate();
     const {toast} = useToast();
     const {user} = useAuth();
-    const [ordersPage, setOrdersPage] = useState(1);
-    const [ordersPageSize] = useState(10);
     const [confirmDeleteItemId, setConfirmDeleteItemId] = useState<number | null>(null);
     const [confirmDeleteCategoryId, setConfirmDeleteCategoryId] = useState<number | null>(null);
+
+    // Pagination dos pedidos
+    const [ordersPage, setOrdersPage] = useState(1);
+    const [ordersPageSize] = useState(2);
+    const [ordersTotalCount, setOrdersTotalCount] = useState(0);
+
+    const loadStaticData = async () => {
+        const [categoriesRes, itemsRes] = await Promise.all([
+            fetchCategories(),
+            fetchItems(),
+        ]);
+
+        if (categoriesRes) setCategories(categoriesRes);
+        if (itemsRes) setItems(itemsRes);
+    };
+
+    const loadOrders = async () => {
+        const ordersRes = await fetchOrders(ordersPage, ordersPageSize);
+
+        if (ordersRes?.data) {
+            setOrders(ordersRes.data);
+            setOrdersTotalCount(ordersRes.meta.total);
+        }
+    };
 
     const checkAdminAccess = useCallback((currentUser: User | null) => {
         if (!currentUser) {
@@ -68,26 +95,24 @@ export default function AdminDashboard() {
 
         setIsAdmin(true);
         setIsLoading(false);
-        loadData();
     }, [navigate, toast]);
 
     useEffect(() => {
-        const current = user ?? null;
-        checkAdminAccess(current);
-
+        checkAdminAccess(user ?? null);
     }, [user, checkAdminAccess]);
 
-    const loadData = async () => {
-        const [categoriesRes, itemsRes, ordersRes] = await Promise.all([
-            fetchCategories(),
-            fetchItems(),
-            fetchOrders(ordersPage, ordersPageSize),
-        ]);
+    useEffect(() => {
+        if (isAdmin) {
+            loadStaticData();
+            loadOrders(); // first load
+        }
+    }, [isAdmin]);
 
-        if (categoriesRes) setCategories(categoriesRes);
-        if (itemsRes) setItems(itemsRes);
-        if (ordersRes.data) setOrders(ordersRes.data);
-    };
+    useEffect(() => {
+        if (isAdmin) {
+            loadOrders();
+        }
+    }, [ordersPage]);
 
     const handleSaveCategory = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -104,7 +129,7 @@ export default function AdminDashboard() {
                 toast({title: "Categoria criada com sucesso!"});
             }
             setEditingCategory(null);
-            loadData();
+            loadStaticData();
         } catch (error: unknown) {
             const err = error as FrontendError;
 
@@ -135,7 +160,7 @@ export default function AdminDashboard() {
         try {
             await deleteCategory(confirmDeleteCategoryId);
             toast({title: "Categoria excluída com sucesso!"});
-            await loadData();
+            await loadStaticData();
             setConfirmDeleteCategoryId(null);
         } catch (error: unknown) {
             const err = error as FrontendError;
@@ -179,7 +204,7 @@ export default function AdminDashboard() {
             }
 
             setEditingItem(null);
-            loadData();
+            loadStaticData();
 
         } catch (error: unknown) {
             const err = error as FrontendError;
@@ -212,6 +237,14 @@ export default function AdminDashboard() {
         }
     };
 
+    useEffect(() => {
+        if (editingItem?.imageUrl) {
+            setPreviewUrl(editingItem.imageUrl);
+        } else {
+            setPreviewUrl(null);
+        }
+    }, [editingItem]);
+
     const handleDeleteItem = async (id: number) => {
         // abre o diálogo de confirmação
         setConfirmDeleteItemId(id);
@@ -224,7 +257,7 @@ export default function AdminDashboard() {
             await deleteItem(confirmDeleteItemId);
             toast({title: "Item excluído com sucesso!"});
             setConfirmDeleteItemId(null);
-            await loadData();
+            await loadStaticData();
         } catch (error: unknown) {
             const err = error as FrontendError;
 
@@ -253,7 +286,7 @@ export default function AdminDashboard() {
                 status: newStatus
             });
             toast({title: "Status do pedido atualizado!"});
-            loadData();
+            loadStaticData();
         } catch (error: unknown) {
             const err = error as FrontendError;
 
@@ -412,8 +445,6 @@ export default function AdminDashboard() {
                                 <Dialog open={editingItem !== null} onOpenChange={(open) => {
                                     if (!open) {
                                         setEditingItem(null);
-                                        setSelectedImage(null);
-                                        setImagePreview(null);
                                     }
                                 }}>
                                     <DialogTrigger asChild>
@@ -475,7 +506,6 @@ export default function AdminDashboard() {
                                                 </div>
                                             </div>
 
-                                            {/* Campo só de URL */}
                                             <div>
                                                 <Label htmlFor="imageUrl">URL da Imagem</Label>
                                                 <Input
@@ -483,14 +513,14 @@ export default function AdminDashboard() {
                                                     name="imageUrl"
                                                     defaultValue={editingItem?.imageUrl ?? ""}
                                                     placeholder="https://exemplo.com/imagem.jpg"
+                                                    onChange={(e) => setPreviewUrl(e.target.value)}
                                                 />
 
-                                                {/* Preview automático se for URL válida */}
-                                                {(editingItem?.imageUrl) && (
-                                                    <div
-                                                        className="relative mt-3 aspect-video w-full overflow-hidden rounded-lg border bg-muted">
+                                                {previewUrl && previewUrl.length > 5 && (
+                                                    <div className="relative mt-3 aspect-video w-full overflow-hidden rounded-lg border bg-muted">
                                                         <img
-                                                            src={editingItem.imageUrl}
+                                                            src={previewUrl}
+                                                            onError={() => setPreviewUrl(null)}
                                                             alt="Preview"
                                                             className="h-full w-full object-cover"
                                                         />
@@ -628,6 +658,47 @@ export default function AdminDashboard() {
                                         ))}
                                     </TableBody>
                                 </Table>
+
+                                {ordersTotalCount > ordersPageSize && (
+                                    <div className="mt-4">
+                                        <Pagination>
+                                            <PaginationContent>
+                                                <PaginationItem>
+                                                    <PaginationPrevious
+                                                        onClick={() => setOrdersPage(p => Math.max(1, p - 1))}
+                                                        className={ordersPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                                    />
+                                                </PaginationItem>
+
+                                                {Array.from({length: Math.ceil(ordersTotalCount / ordersPageSize)}, (_, i) => i + 1)
+                                                    .filter(page => {
+                                                        const totalPages = Math.ceil(ordersTotalCount / ordersPageSize);
+                                                        return page === 1 || page === totalPages || (page >= ordersPage - 1 && page <= ordersPage + 1);
+                                                    })
+                                                    .map((page, index, array) => (
+                                                        <PaginationItem key={page}>
+                                                            {index > 0 && array[index - 1] !== page - 1 &&
+                                                                <span className="px-2">...</span>}
+                                                            <PaginationLink
+                                                                onClick={() => setOrdersPage(page)}
+                                                                isActive={ordersPage === page}
+                                                                className="cursor-pointer"
+                                                            >
+                                                                {page}
+                                                            </PaginationLink>
+                                                        </PaginationItem>
+                                                    ))}
+
+                                                <PaginationItem>
+                                                    <PaginationNext
+                                                        onClick={() => setOrdersPage(p => Math.min(Math.ceil(ordersTotalCount / ordersPageSize), p + 1))}
+                                                        className={ordersPage >= Math.ceil(ordersTotalCount / ordersPageSize) ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                                    />
+                                                </PaginationItem>
+                                            </PaginationContent>
+                                        </Pagination>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </TabsContent>

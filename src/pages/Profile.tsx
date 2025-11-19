@@ -13,7 +13,7 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Badge} from "@/components/ui/badge";
 import {Separator} from "@/components/ui/separator";
 import {useToast} from "@/hooks/use-toast";
-import {Loader2, LogOut, MapPin, Pencil, Plus, Trash2} from "lucide-react";
+import {AlertTriangle, Loader2, LogOut, MapPin, Pencil, Plus, Trash2} from "lucide-react";
 import {useAuth} from "@/hooks/use-auth.ts";
 import {fetchOrderByClientId} from "@/api/orderApi.ts";
 import {Order, paymentMap, statusMap} from "@/types/order.ts";
@@ -21,6 +21,17 @@ import {updateUser, fetchUserWithRelationsById} from "@/api/userApi.ts";
 import {deleteAddress} from "@/api/addressApi.ts";
 import {Address} from "@/types/address.ts";
 import {AddressDialog} from "@/components/AddressDialog.tsx";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {deleteUser} from "@/api/userApi.ts";
 
 const profileSchema = z.object({
     name: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
@@ -39,6 +50,8 @@ export default function Profile() {
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [addressDialogOpen, setAddressDialogOpen] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+    const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     const profileForm = useForm<ProfileFormData>({
         resolver: zodResolver(profileSchema),
@@ -106,6 +119,33 @@ export default function Profile() {
                 description: error.message,
                 variant: "destructive",
             });
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        if (!user.id) return;
+
+        setDeleting(true);
+
+        try {
+            await deleteUser();
+            setDeleting(false);
+            toast({
+                title: "Conta deletada",
+                description: "Sua conta foi deletada permanentemente.",
+            });
+            await logout();
+            navigate("/auth");
+        } catch (error) {
+            setDeleting(false);
+            toast({
+                title: "Erro ao deletar conta",
+                description: "Não foi possível deletar sua conta.",
+                variant: "destructive",
+            });
+        } finally {
+            setDeleting(false);
+            setDeleteAccountDialogOpen(false);
         }
     };
 
@@ -325,6 +365,27 @@ export default function Profile() {
                                 )}
                             </CardContent>
                         </Card>
+
+                        <Card className="border-destructive">
+                            <CardHeader>
+                                <CardTitle className="text-destructive flex items-center gap-2">
+                                    <AlertTriangle className="h-5 w-5" />
+                                    Zona de Perigo
+                                </CardTitle>
+                                <CardDescription>
+                                    Ações irreversíveis relacionadas à sua conta
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Button
+                                    variant="destructive"
+                                    onClick={() => setDeleteAccountDialogOpen(true)}
+                                    className="w-full"
+                                >
+                                    Deletar Minha Conta
+                                </Button>
+                            </CardContent>
+                        </Card>
                     </TabsContent>
 
                     <TabsContent value="pedidos">
@@ -402,6 +463,49 @@ export default function Profile() {
                     onSuccess={handleAddressSuccess}
                 />
             )}
+
+            <AlertDialog open={deleteAccountDialogOpen} onOpenChange={setDeleteAccountDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                            <AlertTriangle className="h-5 w-5" />
+                            Você tem certeza absoluta?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="space-y-2">
+                            <p className="font-semibold">Esta ação não pode ser desfeita!</p>
+                            <p>
+                                Ao deletar sua conta, todos os seus dados serão permanentemente removidos:
+                            </p>
+                            <ul className="list-disc list-inside space-y-1 text-sm">
+                                <li>Informações pessoais e de perfil</li>
+                                <li>Todos os endereços cadastrados</li>
+                                <li>Histórico completo de pedidos</li>
+                                <li>Notificações</li>
+                            </ul>
+                            <p className="font-semibold mt-4">
+                                Esta ação é irreversível e seus dados não poderão ser recuperados.
+                            </p>
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDeleteAccount}
+                            disabled={deleting}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {deleting ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Deletando...
+                                </>
+                            ) : (
+                                "Sim, deletar minha conta"
+                            )}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
