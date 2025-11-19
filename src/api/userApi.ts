@@ -58,7 +58,7 @@ export async function updateUser(user: Partial<Omit<User, 'id' | 'createdAt' | '
 
 export async function deleteUser(): Promise<void> {
     try {
-        await api.delete(`/api/users`);
+        await api.delete(`/api/users`, { skipAuthRefresh: true });
     } catch (error) {
         throw transformApiError(error);
     }
