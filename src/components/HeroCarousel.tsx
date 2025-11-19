@@ -1,14 +1,14 @@
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import carousel1 from "@/assets/carousel-1.jpg";
-import carousel2 from "@/assets/carousel-2.jpg";
-import carousel3 from "@/assets/carousel-3.jpg";
+import _carousel1 from "@/assets/_carousel-1.png";
+import _carousel2 from "@/assets/_carousel-2.png";
+import _carousel3 from "@/assets/_carousel-3.png";
 
 export const HeroCarousel = () => {
   const images = [
-    { src: carousel1, alt: "Pratos brasileiros deliciosos" },
-    { src: carousel2, alt: "Pizzas artesanais" },
-    { src: carousel3, alt: "Hambúrgueres gourmet" },
+    { src: _carousel3, alt: "Pratos brasileiros deliciosos" },
+    { src: _carousel1, alt: "Pizzas artesanais" },
+    { src: _carousel2, alt: "Hambúrgueres gourmet" },
   ];
 
   return (
