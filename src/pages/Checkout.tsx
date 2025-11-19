@@ -225,6 +225,7 @@ export default function Checkout() {
                         <Card>
                             <CardHeader>
                                 <CardTitle>Forma de Pagamento</CardTitle>
+                                <CardDescription>O entregador parceiro cobrará o valor na entrega.</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
