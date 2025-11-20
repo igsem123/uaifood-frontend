@@ -139,6 +139,14 @@ export default function AdminDashboard() {
                     description: err.message,
                     variant: "destructive",
                 });
+            } else if (err.type === "validation") {
+                for (const message of err.messages) {
+                    toast({
+                        title: "Erro de validação",
+                        description: message,
+                        variant: "destructive",
+                    });
+                }
             } else {
                 toast({
                     title: "Erro desconhecido",
@@ -356,7 +364,7 @@ export default function AdminDashboard() {
                                         </DialogHeader>
                                         <form onSubmit={handleSaveCategory} className="space-y-4">
                                             <div>
-                                                <Label htmlFor="name">Nome</Label>
+                                                <Label htmlFor="name">Nome da Categoria</Label>
                                                 <Input
                                                     id="name"
                                                     name="name"
@@ -365,7 +373,7 @@ export default function AdminDashboard() {
                                                 />
                                             </div>
                                             <div>
-                                                <Label htmlFor="description">Nome da Categoria</Label>
+                                                <Label htmlFor="description">Descrição da Categoria</Label>
                                                 <Input
                                                     id="description"
                                                     name="description"

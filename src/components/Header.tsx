@@ -1,4 +1,6 @@
-import {LayoutDashboard, ShoppingCart, User} from "lucide-react";
+import { User } from "lucide-react";
+import { RxDashboard } from "react-icons/rx";
+import { FaCartShopping } from "react-icons/fa6";
 import {Link} from "react-router-dom";
 import {Button} from "./ui/button";
 import logo from "@/assets/logo.svg";
@@ -25,8 +27,6 @@ export const Header = ({ cartItemsCount = 0 }: HeaderProps) => {
 
             if (!user) return;
 
-            console.log(user);
-
             if (!user.type || user.type !== UserType.ADMIN) {
                 setIsAdmin(false);
                 return;
@@ -47,7 +47,7 @@ export const Header = ({ cartItemsCount = 0 }: HeaderProps) => {
 
                 <nav className="flex items-center gap-4">
                     <Link to="/">
-                        <Button variant="ghost">Cardápio</Button>
+                        <Button variant="link">Cardápio</Button>
                     </Link>
 
                     {isAuthenticated ? (
@@ -55,19 +55,19 @@ export const Header = ({ cartItemsCount = 0 }: HeaderProps) => {
                             {isAdmin && (
                                 <Link to="/admin">
                                     <Button variant="ghost">
-                                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                                        <RxDashboard className="mr-2 h-4 w-4" />
                                         Gerenciar
                                     </Button>
                                 </Link>
                             )}
-                            <NotificationsPopover userId={user.id} />
+                            <NotificationsPopover userId={Number(user.id)} />
                             <Link to="/cart" className="relative">
                                 <Button variant="ghost" size="icon">
-                                    <ShoppingCart className="h-5 w-5" />
+                                    <FaCartShopping className="h-5 w-5" />
                                     {cartItemsCount > 0 && (
                                         <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                      {cartItemsCount}
-                    </span>
+                                            {cartItemsCount}
+                                        </span>
                                     )}
                                 </Button>
                             </Link>
