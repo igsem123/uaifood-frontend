@@ -37,6 +37,7 @@ import {
     PaginationLink, PaginationNext,
     PaginationPrevious
 } from "@/components/ui/pagination.tsx";
+import { CreateAdminDialog } from "@/components/CreateAdminDialog";
 
 export default function AdminDashboard() {
     const [isAdmin, setIsAdmin] = useState(false);
@@ -334,7 +335,10 @@ export default function AdminDashboard() {
         <div className="min-h-screen bg-background">
             <Header/>
             <div className="container py-8">
-                <h1 className="mb-8 text-4xl font-bold">Dashboard Admin</h1>
+                <div className="mb-8 flex items-center justify-between">
+                    <h1 className="mb-8 text-4xl font-bold">Dashboard Admin</h1>
+                    <CreateAdminDialog />
+                </div>
 
                 <Tabs defaultValue="categories">
                     <TabsList className="grid w-full grid-cols-3">

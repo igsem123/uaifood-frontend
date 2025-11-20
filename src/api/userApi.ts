@@ -63,3 +63,12 @@ export async function deleteUser(): Promise<void> {
         throw transformApiError(error);
     }
 }
+
+export async function registerAdminUser(name: string, password: string, email: string, phone: string): Promise<User> {
+    try {
+        const response = await api.post("/api/users/admin/register", { name, password, phone, email}, { skipAuthRefresh: true });
+        return response.data.user;
+    } catch (error) {
+        throw transformApiError(error);
+    }
+}
