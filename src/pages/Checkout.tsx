@@ -15,6 +15,7 @@ import {PaymentMethod} from "@/types/order.ts";
 import {FrontendError} from "@/types/frontendError.ts";
 import {Address} from "@/types/address.ts";
 import * as React from "react";
+import noLocation from "@/assets/no-location.svg";
 
 const paymentMethods = [
     {value: "CASH", label: "Dinheiro", icon: Wallet},
@@ -32,6 +33,9 @@ export default function Checkout() {
     const {user, me} = useAuth();
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+    const images = [
+        { src: noLocation, alt: "Carrinho vazio" },
+    ];
 
     const loadProfile = useCallback(async () => {
         try {
@@ -178,7 +182,11 @@ export default function Checkout() {
                             <CardContent>
                                 {addresses.length === 0 ? (
                                     <div className="text-center py-8">
-                                        <MapPin className="mx-auto h-12 w-12 text-muted-foreground mb-3"/>
+                                        <img
+                                            src={images[0].src}
+                                            alt={images[0].alt}
+                                            className="mx-auto mb-4 h-40 w-40 object-contain"
+                                        />
                                         <p className="text-muted-foreground mb-4">
                                             Você ainda não tem endereços cadastrados.
                                         </p>

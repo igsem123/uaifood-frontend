@@ -20,7 +20,7 @@ const loginSchema = z.object({
     password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
 });
 
-const signupSchema = z.object({
+export const signupSchema = z.object({
     name: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
     phone: z.string().min(10, "Telefone inválido"),
     email: z.string().email("Email inválido"),

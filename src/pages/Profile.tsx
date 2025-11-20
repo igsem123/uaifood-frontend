@@ -32,6 +32,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {deleteUser} from "@/api/userApi.ts";
+import noLocation from "@/assets/no-location.svg";
 
 const profileSchema = z.object({
     name: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
@@ -52,6 +53,9 @@ export default function Profile() {
     const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
     const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const images = [
+        { src: noLocation, alt: "Carrinho vazio" },
+    ];
 
     const profileForm = useForm<ProfileFormData>({
         resolver: zodResolver(profileSchema),
@@ -129,14 +133,19 @@ export default function Profile() {
 
         try {
             await deleteUser();
-            setDeleting(false);
             toast({
                 title: "Conta deletada",
                 description: "Sua conta foi deletada permanentemente.",
             });
+            try {
             await logout();
+            } catch (error: unknown) {
+                const err = error as { response?: { status: number }; message?: string };
+                console.warn("Falha no logout após deleção de conta:", err?.response?.status || err?.message || err);
+            }
             navigate("/auth");
         } catch (error) {
+            console.log(error)
             setDeleting(false);
             toast({
                 title: "Erro ao deletar conta",
@@ -310,11 +319,15 @@ export default function Profile() {
                             <CardContent>
                                 {addresses.length === 0 ? (
                                     <div className="text-center py-8">
-                                        <MapPin className="mx-auto h-12 w-12 text-muted-foreground mb-3"/>
+                                        <img
+                                            src={images[0].src}
+                                            alt={images[0].alt}
+                                            className="mx-auto mb-4 h-40 w-40 object-contain"
+                                        />
                                         <p className="text-muted-foreground mb-4">
                                             Você ainda não tem endereços cadastrados.
                                         </p>
-                                        <Button onClick={handleAddAddress} variant="outline">
+                                        <Button onClick={handleAddAddress} variant="link">
                                             <Plus className="mr-2 h-4 w-4"/>
                                             Adicionar Endereço
                                         </Button>

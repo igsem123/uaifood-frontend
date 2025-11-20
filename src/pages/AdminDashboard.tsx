@@ -37,6 +37,7 @@ import {
     PaginationLink, PaginationNext,
     PaginationPrevious
 } from "@/components/ui/pagination.tsx";
+import { CreateAdminDialog } from "@/components/CreateAdminDialog";
 
 export default function AdminDashboard() {
     const [isAdmin, setIsAdmin] = useState(false);
@@ -139,6 +140,14 @@ export default function AdminDashboard() {
                     description: err.message,
                     variant: "destructive",
                 });
+            } else if (err.type === "validation") {
+                for (const message of err.messages) {
+                    toast({
+                        title: "Erro de validação",
+                        description: message,
+                        variant: "destructive",
+                    });
+                }
             } else {
                 toast({
                     title: "Erro desconhecido",
@@ -326,7 +335,10 @@ export default function AdminDashboard() {
         <div className="min-h-screen bg-background">
             <Header/>
             <div className="container py-8">
-                <h1 className="mb-8 text-4xl font-bold">Dashboard Admin</h1>
+                <div className="mb-8 flex items-center justify-between">
+                    <h1 className="mb-8 text-4xl font-bold">Dashboard Admin</h1>
+                    <CreateAdminDialog />
+                </div>
 
                 <Tabs defaultValue="categories">
                     <TabsList className="grid w-full grid-cols-3">
@@ -356,7 +368,7 @@ export default function AdminDashboard() {
                                         </DialogHeader>
                                         <form onSubmit={handleSaveCategory} className="space-y-4">
                                             <div>
-                                                <Label htmlFor="name">Nome</Label>
+                                                <Label htmlFor="name">Nome da Categoria</Label>
                                                 <Input
                                                     id="name"
                                                     name="name"
@@ -365,7 +377,7 @@ export default function AdminDashboard() {
                                                 />
                                             </div>
                                             <div>
-                                                <Label htmlFor="description">Nome da Categoria</Label>
+                                                <Label htmlFor="description">Descrição da Categoria</Label>
                                                 <Input
                                                     id="description"
                                                     name="description"

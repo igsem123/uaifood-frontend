@@ -45,7 +45,6 @@ export default function Menu() {
         }
     };
 
-
     const handleFetchItems = async () => {
         try {
             const data = await fetchItems();

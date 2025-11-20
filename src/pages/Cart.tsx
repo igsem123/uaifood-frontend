@@ -1,5 +1,5 @@
 import {useNavigate} from "react-router-dom";
-import {Minus, Plus, Trash2, ShoppingBag} from "lucide-react";
+import {Minus, Plus, Trash2} from "lucide-react";
 import {Header} from "@/components/Header";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
@@ -7,11 +7,15 @@ import {Separator} from "@/components/ui/separator";
 import {useCart} from "@/contexts/CartContext";
 import {useAuth} from "@/hooks/use-auth.ts";
 import {useEffect} from "react";
+import emptyCart from "@/assets/empty-cart.svg";
 
 export default function Cart() {
     const {items, updateQuantity, removeItem, total, itemCount} = useCart();
     const navigate = useNavigate();
     const {user} = useAuth();
+    const images = [
+        { src: emptyCart, alt: "Carrinho vazio" },
+    ];
 
     useEffect(() => {
         if (!user) {
@@ -39,9 +43,13 @@ export default function Cart() {
                 {items.length === 0 ? (
                     <Card className="py-12">
                         <CardContent className="flex flex-col items-center justify-center gap-4">
-                            <ShoppingBag className="h-16 w-16 text-muted-foreground"/>
+                            <img
+                                src={images[0].src}
+                                alt={images[0].alt}
+                                className="mx-auto h-48 w-48 object-contain"
+                            />
                             <p className="text-xl text-muted-foreground">Seu carrinho está vazio</p>
-                            <Button onClick={() => navigate("/")}>Ver Cardápio</Button>
+                            <Button variant={"link"} onClick={() => navigate("/")}>Ver Cardápio</Button>
                         </CardContent>
                     </Card>
                 ) : (
