@@ -92,12 +92,44 @@ export function AddressDialog({open, onOpenChange, address, userId, onSuccess}: 
                 onSuccess();
                 onOpenChange(false);
             } catch (error) {
-                const err = error as FrontendError;
+                const frontendErr = error as FrontendError | null;
 
+                if (error instanceof z.ZodError) {
+                    error.errors.forEach((e) => {
+                        toast({
+                            title: "Erro no cadastro de endereço",
+                            description: e.message,
+                            variant: "destructive",
+                        });
+                    });
+                    return;
+                }
 
+                if (frontendErr?.type === "validation") {
+                    frontendErr.messages.forEach((m) => {
+                        toast({
+                            title: "Erro no cadastro de endereço",
+                            description: m,
+                            variant: "destructive",
+                        });
+                    });
+                    return;
+                }
+
+                if (frontendErr?.type === "api") {
+                    toast({
+                        title: "Erro no cadastro de endereço",
+                        description: frontendErr.message,
+                        variant: "destructive",
+                    });
+                    return;
+                }
+
+                // Fallback genérico
+                console.error(error);
                 toast({
-                    title: "Erro ao salvar",
-                    description: "Não foi possível criar o endereço.",
+                    title: "Erro no cadastro de endereço",
+                    description: "Ocorreu um erro ao tentar cadastrar. Tente novamente mais tarde.",
                     variant: "destructive",
                 });
             }

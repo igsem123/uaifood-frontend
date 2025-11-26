@@ -22,7 +22,7 @@ const loginSchema = z.object({
 
 export const signupSchema = z.object({
     name: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
-    phone: z.string().min(10, "Telefone inválido"),
+    phone: z.string().min(10, "Telefone inválido, deve ter no mínimo 10 dígitos"),
     email: z.string().email("Email inválido"),
     password: z
         .string()
@@ -105,26 +105,48 @@ export default function Auth() {
             setPassword("");
             setConfirmPassword("");
         } catch (error: unknown) {
-            const err = error as FrontendError;
-            console.error("Signup error:", err);
+            const frontendErr = error as FrontendError | null;
 
-            if (err.type === "validation") {
-                err.messages.forEach((m) => {
+            if (error instanceof z.ZodError) {
+                error.errors.forEach((e) => {
                     toast({
-                        title: "Erro no cadastro",
+                        title: "Erro no cadastro de usuário",
+                        description: e.message,
+                        variant: "destructive",
+                    });
+                });
+                return;
+            }
+
+            if (frontendErr?.type === "validation") {
+                frontendErr.messages.forEach((m) => {
+                    toast({
+                        title: "Erro no cadastro de usuário",
                         description: m,
                         variant: "destructive",
                     });
                 });
-            } else if (err.type === "api") {
+                return;
+            }
+
+            if (frontendErr?.type === "api") {
                 toast({
-                    title: "Erro no cadastro",
-                    description: err.message,
+                    title: "Erro no cadastro de usuário",
+                    description: frontendErr.message,
                     variant: "destructive",
                 });
+                return;
             }
+
+            // Fallback genérico
+            console.error(error);
+            toast({
+                title: "Erro no cadastro de usuário",
+                description: "Ocorreu um erro ao tentar cadastrar. Tente novamente mais tarde.",
+                variant: "destructive",
+            });
         }
-    };
+    }
 
     return (
         <div className={"flex flex-col min-h-screen bg-muted"}>
